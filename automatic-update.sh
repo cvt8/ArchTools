@@ -1,28 +1,33 @@
 #!/bin/sh
 
-#Mettre à jour toutes les applications installées manuellement sous Archlinux
+# Mettre à jour toutes les applications installées manuellement sous Arch Linux (AUR)
 
-cd ~/aur
+cd ~/aur || { echo "Erreur : impossible d'accéder à ~/aur"; exit 1; }
 
-for repository in * 
+for repository in *
 do
-	if test -d $repository
-	then  cd $repository
-	echo "$repository"
-	git pull
-	# vérifier si l'output est "Already up-to-date."
-	# si ce n'est pas le cas, demander à l'utilisateur s'il veut mettre à jour
-	# si oui, lancer makepkg -sirc
-	# si non, continuer
+    if [ -d "$repository" ]; then
+        cd "$repository" || continue
+        echo "Vérification de $repository..."
 
-	if test "$(git pull)" != "Déjà à jour."
-	then
-		echo "mettre à jour ? (o/n)"
-		read reponse
-		if test $reponse = o
-			then  makepkg -sirc
-		fi
-	fi
-	cd ..
-	fi
+        # Capturer la sortie de git pull
+        git_output=$(git pull 2>&1)
+
+        # Vérifier si le dépôt est déjà à jour
+        if echo "$git_output" | grep -q "Already up to date\|Déjà à jour."; then
+            echo "$repository est déjà à jour."
+        else
+            echo "Mise à jour disponible pour $repository. Mettre à jour ? (o/n)"
+            read -r reponse
+            case "$reponse" in
+                [oO]*)
+                    makepkg -sirc || echo "Erreur lors de la mise à jour de $repository"
+                    ;;
+                *)
+                    echo "Mise à jour ignorée pour $repository"
+                    ;;
+            esac
+        fi
+        cd .. || exit 1
+    fi
 done
