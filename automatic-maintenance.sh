@@ -38,6 +38,11 @@ if ! command -v sudo >/dev/null 2>&1; then
     exit 1
 fi
 
+# Etape 0: Supprimer les fichiers inutiles
+
+echo "Supression des fichiers inutiles avec rmshit"
+python rmshit.py
+
 # Vérifier si pacman est disponible
 if ! command -v pacman >/dev/null 2>&1; then
     error "Ce script est conçu pour Arch Linux (pacman requis)."
