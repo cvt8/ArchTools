@@ -98,4 +98,21 @@ else
     log "Nettoyage du cache ignoré."
 fi
 
+# Etape 5 : Prune docker images
+log "Suppression des images Docker inutilisées..."
+if command -v docker >/dev/null 2>&1; then
+    if confirm "Supprimer les images Docker inutilisées ?"; then
+        if ! docker image prune -a --force; then
+            error "Échec de la suppression des images Docker."
+            exit 1
+        fi
+        log "Images Docker inutilisées supprimées."
+    else
+        log "Suppression des images Docker ignorée."
+    fi
+else
+    log "Docker n'est pas installé. Suppression des images Docker ignorée."
+fi
+
+
 log "Maintenance terminée avec succès !"
